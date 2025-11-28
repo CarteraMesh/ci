@@ -63,7 +63,7 @@ jobs:
       - name: cargo test -Zsanitizer=address
         # only --lib --tests b/c of https://github.com/rust-lang/rust/issues/53945
         run: |
-          if [ "${{ inputs.fireblocks" == "true" ]; then
+          if [ "${{ inputs.fireblocks }}" == "true" ]; then
             export RPC_URL=${{ secrets.RPC_URL }}
             export FIREBLOCKS_API_KEY=${{ secrets.FIREBLOCKS_API_KEY || '' }}
             export FIREBLOCKS_SECRET=${{ secrets.FIREBLOCKS_SECRET || '' }}

@@ -67,7 +67,8 @@ jobs:
         run: cargo generate-lockfile
       - name: llvm-cov (${{ matrix.features }})
         run: |
-          if [ "${{ inputs.fireblocks" == "true" ]; then
+          echo "ACTION_PATH=$GITHUB_ACTION_PATH"
+          if [ "${{ inputs.fireblocks }}" == "true" ]; then
             export RPC_URL=${{ secrets.RPC_URL }}
             export FIREBLOCKS_API_KEY=${{ secrets.FIREBLOCKS_API_KEY || '' }}
             export FIREBLOCKS_SECRET=${{ secrets.FIREBLOCKS_SECRET || '' }}
