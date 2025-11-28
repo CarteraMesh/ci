@@ -30,7 +30,9 @@ on:
         type: string
         default: "info"
         required: false
-
+env:
+  MEMO: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} {{ github.job }}"
+  JOB_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -60,6 +62,7 @@ jobs:
         run: cargo generate-lockfile
       - name: llvm-cov (${{ matrix.features }})
         run: |
+          echo "MEMO_JOB=$MEMO_JOB"
           if [ "${{ matrix.features }}" == "default" ]; then
             cargo llvm-cov --locked --lcov --output-path lcov-${{ matrix.features }}.info --no-fail-fast -- --no-capture
           else
