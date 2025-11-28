@@ -67,21 +67,23 @@ jobs:
         run: cargo generate-lockfile
       - name: llvm-cov (${{ matrix.features }})
         run: |
+          if [ "${{ inputs.fireblocks" == "true" ]; then
+            export RPC_URL=${{ secrets.RPC_URL }}
+            export FIREBLOCKS_API_KEY=${{ secrets.FIREBLOCKS_API_KEY || '' }}
+            export FIREBLOCKS_SECRET=${{ secrets.FIREBLOCKS_SECRET || '' }}
+            export FIREBLOCKS_ENDPOINT=${{ vars.FIREBLOCKS_ENDPOINT || '' }}
+            export FIREBLOCKS_POLL_TIMEOUT="90"
+            export FIREBLOCKS_POLL_INTERVAL="5"
+            export FIREBLOCKS_DEVNET="true"
+            export FIREBLOCKS_VAULT="0"
+            export TEST_PRIVATE_KEY=${{ secrets.TEST_PRIVATE_KEY || '' }}
+          fi
           if [ "${{ matrix.features }}" == "default" ]; then
             cargo llvm-cov --locked --lcov --output-path lcov-${{ matrix.features }}.info --no-fail-fast -- --no-capture ${{ inputs.args }}
           else
             cargo llvm-cov --locked --features "${{ matrix.features }}" --lcov --output-path lcov-${{ matrix.features }}.info --no-fail-fast -- --no-capture ${{ inputs.args }}
           fi
-        env:
-          RPC_URL: ${{ inputs.fireblocks && secrets.RPC_URL }}
-          FIREBLOCKS_API_KEY: ${{ inputs.fireblocks && secrets.FIREBLOCKS_API_KEY || '' }}
-          FIREBLOCKS_SECRET: ${{ inputs.fireblocks && secrets.FIREBLOCKS_SECRET || '' }}
-          FIREBLOCKS_ENDPOINT: ${{ inputs.fireblocks && vars.FIREBLOCKS_ENDPOINT || '' }}
-          FIREBLOCKS_POLL_TIMEOUT: "90"
-          FIREBLOCKS_POLL_INTERVAL: "5"
-          FIREBLOCKS_DEVNET: "true"
-          FIREBLOCKS_VAULT: "0"
-          TEST_PRIVATE_KEY: ${{ inputs.fireblocks && secrets.TEST_PRIVATE_KEY || '' }}
+
       - name: Record Rust version
         run: echo "RUST=$(rustc --version)" >> "$GITHUB_ENV"
       - name: Upload to codecov.io
