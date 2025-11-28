@@ -14,13 +14,17 @@ on:
         type: string
         default: ".github/ci-scripts/extra.sh"
         required: false
+      runner:
+        type: string
+        default: ${{ vars.RUNNER }}
+        required: false
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   fmt:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: nightly fmt
     steps:
       - name: Init
@@ -29,7 +33,7 @@ jobs:
         run: |
           cargo +nightly fmt --check --all
   clippy:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: ${{ matrix.toolchain }} / clippy / ${{ matrix.features }}
     permissions:
       contents: read
@@ -55,7 +59,7 @@ jobs:
       #     tool_name: clippy-${{ matrix.features }}
       #     clippy_flags: ${{ matrix.features != 'default' && format('--features {0}', matrix.features) || '' }}
   semver:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: semver
     if: true
     steps:
@@ -69,7 +73,7 @@ jobs:
   hack:
     # cargo-hack checks combinations of feature flags to ensure that features are all additive
     # which is required for feature unification
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: hack
     steps:
       - name: Init
@@ -82,7 +86,7 @@ jobs:
         run: cargo hack --feature-powerset check
 
   doc:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: doc
     steps:
       - name: Init
@@ -92,7 +96,7 @@ jobs:
           cargo +nightly docs-rs
 
   cargo_sort:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: cargo-sort
     steps:
       - name: Init
@@ -108,7 +112,7 @@ jobs:
           fi
 
   machete:
-    runs-on: ${{ vars.RUNNER }}
+    runs-on: ${{ inputs.runner }}
     name: check unused deps - machete
     steps:
       - name: Init
