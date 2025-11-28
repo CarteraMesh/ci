@@ -5,7 +5,7 @@ on:
       ubuntu_packages:
         type: string
         required: false
-        default: "nothing"
+        default: ""
       toolchains:
         type: string
         required: false
