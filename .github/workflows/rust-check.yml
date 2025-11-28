@@ -10,7 +10,7 @@ on:
         type: string
         required: false
         default: '["stable","nightly"]'
-      feature_matrix:
+      features:
         type: string
         required: false
         default: '["default"]'
@@ -46,7 +46,7 @@ jobs:
       fail-fast: false
       matrix:
         toolchain: ${{ fromJSON(inputs.toolchains) }}
-        features: ${{ fromJSON(inputs.feature_matrix) }}
+        features: ${{ fromJSON(inputs.features) }}
     steps:
       - name: Init
         uses: carteramesh/ci/.github/actions/rust-init@main
