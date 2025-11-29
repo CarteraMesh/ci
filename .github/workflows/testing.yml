@@ -1,0 +1,33 @@
+name: experiments
+on:
+  workflow_dispatch:
+jobs:
+  config:
+    name: github action hacks
+    runs-on: ${{ vars.RUNNER }}
+    outputs:
+      config: ${{ steps.config.outputs.config }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: dump env
+        shell: bash
+        run: env | sort | grep GITHUB
+      - name: create config
+        id: config
+        shell: bash
+        run: |
+          echo config='{ "check": { "fmt": { "disabled": true} } }' >> $GITHUB_OUTPUT
+  test:
+    name: test
+    needs: config
+    runs-on: ${{ vars.RUNNER }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: run tests
+        shell: bash
+        run: |
+          echo ${{ needs.config.outputs.config }} | jq '.'
+          echo fromJSON="${{ fromJSON(needs.config.outputs.config) }}" || echo "config failed"
+          echo fromJSON="${{ fromJSON(needs.config.outputs.config.fmt.disabled) }}" || echo "fmt disabled"
