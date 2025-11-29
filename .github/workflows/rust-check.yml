@@ -22,6 +22,10 @@ on:
         type: string
         default: ${{ vars.RUNNER }}
         required: false
+      disable:
+        type: string
+        default: ""
+        required: false
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -62,7 +66,7 @@ jobs:
   semver:
     runs-on: ${{ inputs.runner }}
     name: semver
-    if: true
+    if: ${{ !contains(inputs.disable, 'semver') }}
     steps:
       - name: Init
         uses: carteramesh/ci/.github/actions/rust-init@main
@@ -78,6 +82,7 @@ jobs:
     # which is required for feature unification
     runs-on: ${{ inputs.runner }}
     name: hack
+    if: ${{ !contains(inputs.disable, 'hack') }}
     steps:
       - name: Init
         uses: carteramesh/ci/.github/actions/rust-init@main
@@ -96,6 +101,7 @@ jobs:
   doc:
     runs-on: ${{ inputs.runner }}
     name: doc
+    if: ${{ !contains(inputs.disable, 'doc') }}
     steps:
       - name: Init
         uses: carteramesh/ci/.github/actions/rust-init@main
