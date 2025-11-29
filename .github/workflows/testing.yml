@@ -24,11 +24,9 @@ jobs:
     needs: config
     runs-on: ${{ vars.RUNNER }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
       - name: run tests
         shell: bash
         run: |
           echo '${{ needs.config.outputs.config }}' | jq '.'
           echo fromJSON="${{ fromJSON(needs.config.outputs.config) }}" || echo "config failed"
-          echo fromJSON="{{ fromJSON(needs.config.outputs.config.fmt.disabled) }}" || echo "fmt disabled"
+          echo fromJSON="${{ fromJSON(needs.config.outputs.config.check.fmt.disabled) }}" || echo "fmt disabled"
