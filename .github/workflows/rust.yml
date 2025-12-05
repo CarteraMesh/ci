@@ -1,5 +1,3 @@
-permissions:
-  contents: read
 on:
   workflow_call:
     inputs:
@@ -21,8 +19,10 @@ jobs:
     outputs:
       config: ${{ steps.merge.outputs.config }}
     steps:
-      - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          token: ${{ github.token }}
       - name: Check if yq exists
         id: check-yq
         shell: bash
@@ -38,8 +38,9 @@ jobs:
       - name: Merge YAML configs
         shell: bash
         run: |
+          env | grep GITHUB | sort
           yq eval-all '. as $item ireduce ({}; . * $item)' \
-            ${{ github.action_path }}/.github/ci-configs/rust-default.yml \
+            ${GITHUB_ACTION_PATH}/.github/ci-configs/rust-default.yml \
             .github/ci-configs/*.yml \
             -o json > merged.json
       - name: merge
