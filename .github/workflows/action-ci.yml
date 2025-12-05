@@ -68,13 +68,20 @@ jobs:
 
       - name: Merge YAML configs
         shell: bash
-        run: echo merge
+        run: |
+          yq eval-all '. as $item ireduce ({}; . * $item)' \
+            .github/cl-configs/rust-default.yaml \
+            .github/ci-configs/test/*.yaml \
+            -o json > merged.json
       - name: Test Local Action
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          config: merged.json
 
       - name: Print Output
         id: output
-        run: echo "${{ steps.test-action.outputs.time }}"
+        run: |
+          echo '${{ steps.test-action.outputs.config }}' | jq .
+          runner="${{ fromJSON(steps.test-action.outputs.config).runner }}"
+          echo $runner

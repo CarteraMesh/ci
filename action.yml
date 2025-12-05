@@ -8,10 +8,12 @@ branding:
 
 # Define your inputs here.
 inputs:
-  configs:
-    description: space separated list of configs to merge
-    required: false
-    default: ''
+  config:
+    description: file path or JSON string
+    required: true
+  runner:
+    description: runner name
+    required: true
 
 # Define your outputs here.
 outputs:

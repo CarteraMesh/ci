@@ -27246,16 +27246,31 @@ function requireCore () {
 
 var coreExports = requireCore();
 
-/**
- * The main function for the action.
- *
- * @returns Resolves when the action is complete.
- */
 async function run() {
     try {
-        const configs = coreExports.getInput('configs');
-        coreExports.debug(`${configs}`);
-        const finalConfig = {};
+        const configFilePath = coreExports.getInput('config');
+        coreExports.debug(`${configFilePath}`);
+        let configRaw;
+        if (configFilePath.includes('{')) {
+            configRaw = configFilePath;
+        }
+        else {
+            configRaw = require$$1.readFileSync(configFilePath, 'utf8');
+        }
+        const finalConfig = JSON.parse(configRaw);
+        finalConfig.runner = coreExports.getInput('runner') || 'ubuntu-latest';
+        if (!finalConfig.jobs.clippy.matrix.os) {
+            finalConfig.jobs.clippy.matrix.os = [];
+        }
+        if (!finalConfig.jobs.coverage.matrix.os) {
+            finalConfig.jobs.coverage.matrix.os = [];
+        }
+        if (finalConfig.jobs.clippy.matrix.os.length === 0) {
+            finalConfig.jobs.clippy.matrix.os.push(finalConfig.runner);
+        }
+        if (finalConfig.jobs.coverage.matrix.os.length === 0) {
+            finalConfig.jobs.coverage.matrix.os.push(finalConfig.runner);
+        }
         coreExports.setOutput('config', JSON.stringify(finalConfig));
     }
     catch (error) {
