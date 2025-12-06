@@ -2,10 +2,6 @@ name: Release
 on:
   workflow_call:
     inputs:
-      ubuntu_packages:
-        type: string
-        required: false
-        default: ''
       runner:
         type: string
         default: ${{ vars.RUNNER }}
@@ -15,19 +11,34 @@ on:
         required: true
       package:
         type: string
-        default: 'default'
+        required: true
+      cargo-release-args:
+        type: string
         required: false
+        default: ''
 
 jobs:
+  config:
+    runs-on: ${{ inputs.runner || vars.RUNNER }}
+    name: generate config
+    outputs:
+      config: ${{ steps.merge.outputs.config }}
+    steps:
+      - name: merge
+        id: merge
+        uses: carteramesh/ci/.github/actions/rust-config@main
+        with:
+          git_token: ${{ github.token }}
+          runner: ${{ inputs.runner }}
   release:
-    runs-on: ${{ inputs.runner }}
+    needs: [config]
+    outputs:
+      bin: ${{ steps.bin.outputs.bin_name }}
+      tag: ${{ steps.release.outputs.tag }}
+    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
     permissions:
       contents: write
     steps:
-      - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
-        with:
-          ubuntu_packages: ${{ inputs.ubuntu_packages }}
       - name: Install cargo-release
         uses: taiki-e/install-action@v2
         with:
@@ -37,12 +48,88 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
       - name: Release
+        id: release
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NO_PUBLISH: ${{ fromJSON(needs.config.outputs.config).release.cargo-publish && '' || '--no-publish' }}
         run: |
-          if [[ "${{ inputs.package }}" == "default" ]]; then
-            cargo release --execute --no-confirm ${{ inputs.version }}
-          else
-            cargo release --package ${{ inputs.package }} --execute --no-confirm ${{ inputs.version }}
+          cargo release \
+            --package ${{ inputs.package }} \
+            --execute \
+            --no-confirm ${NO_PUBLISH} \
+            ${{ inputs.cargo-release-args }} ${{ inputs.version }}
+
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          make_latest="true"
+          case ${{ inputs.version }} in
+            alpha)
+              make_latest="false"
+              ;;
+            beta)
+              make_latest="false"
+              ;;
+            rc)
+              make_latest="false"
+              ;;
+            *)
+              make_latest="true"
+              ;;
+          esac
+          echo "make_latest=$make_latest" >> $GITHUB_OUTPUT
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release.outputs.tag }}
+          generate_release_notes: true
+          make_latest: ${{ steps.release.outputs.make_latest == 'true' }}
+
+      - name: Detect binary
+        id: bin
+        shell: bash
+        run: |
+          bin_name=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | select(.name == "${{ inputs.package }}") | .targets[0].name' )
+          if [ -n "$bin_name" ]; then
+            echo "bin_name=$bin_name" >> $GITHUB_OUTPUT
+          #else
+          #  echo "bin_name=null" >> $GITHUB_OUTPUT
           fi
+
+  upload-assets:
+    needs: [config, release]
+    name: assets / ${{ matrix.os }}
+    if: ${{ needs.release.outputs.bin_name }}
+    strategy:
+      matrix:
+        include: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).release.os)) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Init
+        uses: carteramesh/ci/.github/actions/rust-init@main
+        with:
+          packages: ${{ fromJSON(needs.config.outputs.config).global.ubuntu_packages }}
+          ref: ${{ needs.release.outputs.tag }}
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          checksum: sha256
+          profile: ${{ fromJSON(needs.config.outputs.config).release.profile || 'release' }}
+          package: ${{ inputs.package }}
+          # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
+          # Note that glob pattern is not supported yet.
+          bin: ${{ needs.release.outputs.bin }}
+          # (optional) Target triple, default is host triple.
+          target: ${{ matrix.target }}
+          # (optional) On which platform to distribute the `.tar.gz` file.
+          # [default value: unix]
+          # [possible values: all, unix, windows, none]
+          tar: unix
+          # (optional) On which platform to distribute the `.zip` file.
+          # [default value: windows]
+          # [possible values: all, unix, windows, none]
+          zip: windows
+          # (optional) Build with the given set of features if any.
+          features: ${{ matrix.features || '' }}
+          # (required) GitHub token for uploading assets to GitHub Releases.
+          token: ${{ secrets.GITHUB_TOKEN }}
+#  cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | select(.name == "kiro-generator")'

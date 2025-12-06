@@ -30435,6 +30435,25 @@ const ConfigSchema = object({
             'set-env-vars': boolean().default(true),
         }),
     }),
+    release: object({
+        cargo_publish: boolean().default(true),
+        profile: string().default('release'),
+        os: array(object({
+            target: string(),
+            os: string(),
+            features: array(string()).optional(),
+        }))
+            .default([
+            {
+                target: 'x86_64-unknown-linux-gnu',
+                os: 'ubicloud-standard-4',
+            },
+            {
+                target: 'aarch64-apple-darwin',
+                os: 'macos-latest',
+            },
+        ]),
+    }),
     jobs: object({
         coverage: object({
             if: boolean(),
