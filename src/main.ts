@@ -2,7 +2,7 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import { z } from 'zod';
 
-const ConfigSchema = z.object({
+export const ConfigSchema = z.object({
   runner: z.string().optional(),
   global: z.object({
     ubuntu_packages: z.string().optional(),

@@ -87,6 +87,7 @@ jobs:
 
       - name: Print Output
         id: output
+        shell: bash
         run: |
           echo '${{ steps.test-action.outputs.config }}' | jq .
           runner="${{ fromJSON(steps.test-action.outputs.config).runner }}"
