@@ -68,26 +68,24 @@ jobs:
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           make_latest="true"
           case ${{ inputs.version }} in
-            alpha)
+            alpha|beta|rc)
               make_latest="false"
-              ;;
-            beta)
-              make_latest="false"
-              ;;
-            rc)
-              make_latest="false"
+              prerelease="true"
               ;;
             *)
               make_latest="true"
+              prerelease="false"
               ;;
           esac
           echo "make_latest=$make_latest" >> $GITHUB_OUTPUT
+          echo "prerelease=$prerelease" >> $GITHUB_OUTPUT
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.release.outputs.tag }}
           generate_release_notes: true
-          make_latest: ${{ steps.release.outputs.make_latest == 'true' }}
+          make_latest: ${{ steps.release.outputs.make_latest }}
+          prerelease: ${{ steps.release.outputs.prerelease == 'true' }}
 
       - name: Detect binary
         id: bin
