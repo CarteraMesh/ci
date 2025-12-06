@@ -103,8 +103,10 @@ export async function run(): Promise<void> {
       configRaw = fs.readFileSync(configFilePath, 'utf8');
     }
     const finalConfig: Config = ConfigSchema.parse(JSON.parse(configRaw));
-    finalConfig.runner = core.getInput('runner') || 'ubuntu-latest';
-
+    finalConfig.runner = core.getInput('runner');
+    if (!finalConfig.runner) {
+      core.setFailed('runner is required');
+    }
     const jobsWithMatrix = Object.entries(finalConfig.jobs)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
       .filter(([_, job]) => 'matrix' in job && 'os' in (job as any).matrix)

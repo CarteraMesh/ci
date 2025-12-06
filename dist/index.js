@@ -30522,7 +30522,10 @@ async function run() {
             configRaw = require$$1.readFileSync(configFilePath, 'utf8');
         }
         const finalConfig = ConfigSchema.parse(JSON.parse(configRaw));
-        finalConfig.runner = coreExports.getInput('runner') || 'ubuntu-latest';
+        finalConfig.runner = coreExports.getInput('runner');
+        if (!finalConfig.runner) {
+            coreExports.setFailed('runner is required');
+        }
         const jobsWithMatrix = Object.entries(finalConfig.jobs)
             // eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unused-vars
             .filter(([_, job]) => 'matrix' in job && 'os' in job.matrix)
