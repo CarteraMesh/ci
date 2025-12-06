@@ -1,4 +1,4 @@
-name: Continuous Integration
+name: test
 
 on:
   pull_request:
@@ -45,9 +45,14 @@ jobs:
         run: npm run ci-test
 
   test-action:
-    name: GitHub Actions Test
-    runs-on: ${{ vars.RUNNER }}
-
+    name: Actions Test / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ${{ vars.RUNNER }}
+          - windows-latest
     steps:
       - name: Checkout
         id: checkout
@@ -78,7 +83,7 @@ jobs:
         uses: ./
         with:
           config: merged.json
-          runner: ${{ vars.RUNNER }}
+          runner: ${{ matrix.os }}
 
       - name: Print Output
         id: output
