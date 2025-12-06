@@ -14,6 +14,28 @@ export const ConfigSchema = z.object({
       'set-env-vars': z.boolean().default(true),
     }),
   }),
+  release: z.object({
+    cargo_publish: z.boolean().default(true),
+    profile: z.string().default('release'),
+    os: z
+      .array(
+        z.object({
+          target: z.string(),
+          os: z.string(),
+          features: z.array(z.string()).optional(),
+        }),
+      )
+      .default([
+        {
+          target: 'x86_64-unknown-linux-gnu',
+          os: 'ubicloud-standard-4',
+        },
+        {
+          target: 'aarch64-apple-darwin',
+          os: 'macos-latest',
+        },
+      ]),
+  }),
   jobs: z.object({
     coverage: z.object({
       if: z.boolean(),
