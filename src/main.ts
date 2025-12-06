@@ -5,7 +5,11 @@ import { z } from 'zod';
 export const ConfigSchema = z.object({
   runner: z.string().optional(),
   global: z.object({
-    ubuntu_packages: z.string().optional(),
+    packages: z.object({
+      Linux: z.string().optional(),
+      macOS: z.string().optional(),
+      Windows: z.string().optional(),
+    }),
     toolchains: z.array(z.string()).default(['stable', 'nightly']),
     features: z.array(z.string()).default(['default']),
     rustlog: z.string().default('info'),

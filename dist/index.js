@@ -30426,7 +30426,11 @@ function superRefine(fn) {
 const ConfigSchema = object({
     runner: string().optional(),
     global: object({
-        ubuntu_packages: string().optional(),
+        packages: object({
+            Linux: string().optional(),
+            macOS: string().optional(),
+            Windows: string().optional(),
+        }),
         toolchains: array(string()).default(['stable', 'nightly']),
         features: array(string()).default(['default']),
         rustlog: string().default('info'),

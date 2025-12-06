@@ -92,11 +92,16 @@ jobs:
           echo '${{ steps.test-action.outputs.config }}' | jq .
           runner="${{ fromJSON(steps.test-action.outputs.config).runner }}"
           rustlog="${{ fromJSON(steps.test-action.outputs.config).global.rustlog }}"
+          packages="${{ fromJSON(steps.test-action.outputs.config).global.packages.Linux }}"
           if [ "$runner" != "${{ matrix.os }}" ]; then
             echo "Runner mismatch ${runner} != ${{ matrix.os }}"
             exit 1
           fi
           if [ "$rustlog" != "debug" ]; then
             echo "Rust log level mismatch ${rustlog} != debug"
+            exit 1
+          fi
+          if [ "$packages" != "curl" ]; then
+            echo "mismatch ${packages} != curl"
             exit 1
           fi
