@@ -5,6 +5,15 @@ import { z } from 'zod/v3';
 export const ConfigSchema = z
   .object({
     runner: z.string().optional(),
+    ai: z.object({
+      enabled: z.boolean().default(true),
+      allowed_bots: z.string().default('*'),
+      claude_args: z.string().optional(),
+      use_sticky_comment: z.boolean().default(false),
+      track_progress: z.boolean().default(true),
+      settings: z.string().optional(),
+      prompt: z.string(),
+    }),
     global: z.object({
       packages: z.object({
         Linux: z.string().optional(),

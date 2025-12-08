@@ -31031,6 +31031,15 @@ ZodNullable.create;
 
 const ConfigSchema = objectType({
     runner: stringType().optional(),
+    ai: objectType({
+        enabled: booleanType().default(true),
+        allowed_bots: stringType().default('*'),
+        claude_args: stringType().optional(),
+        use_sticky_comment: booleanType().default(false),
+        track_progress: booleanType().default(true),
+        settings: stringType().optional(),
+        prompt: stringType(),
+    }),
     global: objectType({
         packages: objectType({
             Linux: stringType().optional(),

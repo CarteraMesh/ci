@@ -7,6 +7,38 @@
         "runner": {
           "type": "string"
         },
+        "ai": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "allowed_bots": {
+              "type": "string",
+              "default": "*"
+            },
+            "claude_args": {
+              "type": "string"
+            },
+            "use_sticky_comment": {
+              "type": "boolean",
+              "default": false
+            },
+            "track_progress": {
+              "type": "boolean",
+              "default": true
+            },
+            "settings": {
+              "type": "string"
+            },
+            "prompt": {
+              "type": "string"
+            }
+          },
+          "required": ["prompt"],
+          "additionalProperties": false
+        },
         "global": {
           "type": "object",
           "properties": {
@@ -385,7 +417,7 @@
           "additionalProperties": false
         }
       },
-      "required": ["global", "release", "jobs"],
+      "required": ["ai", "global", "release", "jobs"],
       "additionalProperties": false,
       "description": "RUST CI Configuration"
     }
