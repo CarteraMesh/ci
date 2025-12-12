@@ -40,7 +40,7 @@ ai:
     - [ ] Proper error handling
     - [ ] No sensitive data in logs
 
-    For each item, check if it's satisfied and comment on any that need attention.
+    For each item, check if it is satisfied and comment on any that need attention.
     Post a summary comment with checklist results.
 
   # https://code.claude.com/docs/en/settings
