@@ -36,11 +36,10 @@ jobs:
       pull-requests: write
       id-token: write
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
+      - name: Init
+        uses: carteramesh/ci/.github/actions/rust-init@main
         with:
-          fetch-depth: 1
-
+          packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: jobtaker
         if: ${{ fromJSON(needs.config.outputs.config).ai.enabled }}
         uses: anthropics/claude-code-action@v1
