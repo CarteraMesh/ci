@@ -48,11 +48,17 @@ runs:
         ls $BRANCH_ACTION_CONFIG || echo no branch action config files found
         ls $BRANCH_CONFIG || echo no repo branch config files found
         ls .github/ci-configs/rust*.yml || echo no repo config files find
+        DUMMY=""
+        if [ -f .github/ci-configs/dummy.yml ]; then
+          DUMMY=".github/ci-configs/dummy.yml"
+          echo found dummy config for testing
+        fi
         yq eval-all '. as $item ireduce ({}; . * $item)' \
           "${{ github.action_path }}/../../ci-configs/rust-default.yml" \
           $BRANCH_ACTION_CONFIG \
           $BRANCH_CONFIG \
           .github/ci-configs/rust*.yml \
+          $DUMMY \
           -o json > merged.json
     - name: merge
       id: merge

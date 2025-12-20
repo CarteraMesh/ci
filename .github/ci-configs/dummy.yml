@@ -1,0 +1,15 @@
+'$schema': https://github.com/CarteraMesh/ci/raw/refs/heads/main/schemas/rust-ci-config.schema.json
+
+jobs:
+  semver:
+    if: false
+    continue-on-error: true
+  extra:
+    if: true
+    continue-on-error: false
+    name: extra-dummy
+    run: echo "Running extra job"
+
+pages:
+  mdbook:
+    if: true
