@@ -2,6 +2,7 @@
 node_modules
 target/
 Cargo.lock
+docs/book/
 
 # Rest pulled from https://github.com/github/gitignore/blob/master/Node.gitignore
 # Logs
