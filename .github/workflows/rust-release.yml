@@ -85,3 +85,54 @@ jobs:
           generate_release_notes: true
           make_latest: ${{ steps.release.outputs.make_latest }}
           prerelease: ${{ steps.release.outputs.prerelease == 'true' }}
+
+  bin:
+    name: assets / ${{ matrix.target }}
+    if: ${{ fromJSON(needs.config.outputs.config).release.bin }}
+    needs: [config, release]
+    strategy:
+      matrix:
+        include: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).release.os)) }}
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Init / ${{ matrix.target }}
+        uses: carteramesh/ci/.github/actions/rust-init@main
+        with:
+          packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
+          ref: ${{ needs.release.outputs.tag }}
+      - name: Build / ${{ matrix.target }}
+        id: build
+        run: |
+          if [ ${{ fromJSON(needs.config.outputs.config).release.debian }} == "true" ] && [ "${RUNNER_OS}" != "macOS" ]; then
+            cargo install cargo-deb
+            cargo deb --target ${{ matrix.target }}
+            echo _dpkg="$(ls target/debian/*.deb)" >> $GITHUB_OUTPUT
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
+          echo _bin=target/${{ matrix.target }}/release/${{ fromJSON(needs.config.outputs.config).release.bin }} >> $GITHUB_OUTPUT
+      - name: Package / ${{ matrix.target }}
+        run: |
+          tar czf ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz ${{ steps.build.outputs._bin }}
+          sha256sum ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz > ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz.sha256
+
+      - name: Hash Deb / ${{ matrix.target }}
+        if: ${{ steps.build.outputs._dpkg }}
+        run: |
+          sha256sum  ${{ steps.build.outputs._dpkg }} > ${{ steps.build.outputs._dpkg }}.sha256
+
+      - name: Upload / ${{ matrix.target }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: |
+            ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz
+            ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz.sha256
+      - name: Deb Upload / ${{ matrix.target }}
+        if: ${{ steps.build.outputs._dpkg }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.release.outputs.tag }}
+          files: |
+            ${{ steps.build.outputs._dpkg }}
+            ${{ steps.build.outputs._dpkg }}.sha256

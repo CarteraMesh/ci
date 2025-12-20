@@ -48,6 +48,7 @@ function schema_release() {
   return z.object({
     ['cargo-publish']: z.boolean().default(true),
     debian: z.boolean().default(false),
+    bin: z.string().optional(),
     profile: z.string().default('release'),
     os: z
       .array(

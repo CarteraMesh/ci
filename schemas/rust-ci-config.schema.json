@@ -132,6 +132,9 @@
               "type": "boolean",
               "default": false
             },
+            "bin": {
+              "type": "string"
+            },
             "profile": {
               "type": "string",
               "default": "release"

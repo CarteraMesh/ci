@@ -24,7 +24,7 @@
   },
   "scripts": {
     "bundle": "npm run format:write && npm run package",
-    "precommit": "npm run lint && npm run bundle",
+    "precommit": "npm run lint && npm run bundle && npm run schema",
     "ci-test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "coverage": "npx make-coverage-badge --output-path ./badges/coverage.svg",
     "format:write": "npx prettier --write .",
@@ -35,7 +35,7 @@
     "package:watch": "npm run package -- --watch",
     "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest",
     "all": "npm run format:write && npm run lint && npm run test && npm run coverage && npm run package",
-    "generate-schema": "tsx scripts/generate-schema.ts"
+    "schema": "tsx scripts/generate-schema.ts && npm run format:write"
   },
   "license": "MIT",
   "dependencies": {

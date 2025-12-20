@@ -31072,6 +31072,7 @@ function schema_release() {
     return objectType({
         ['cargo-publish']: booleanType().default(true),
         debian: booleanType().default(false),
+        bin: stringType().optional(),
         profile: stringType().default('release'),
         os: arrayType(objectType({
             target: stringType(),
