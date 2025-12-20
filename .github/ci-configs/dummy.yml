@@ -1,5 +1,14 @@
 '$schema': https://github.com/CarteraMesh/ci/raw/refs/heads/main/schemas/rust-ci-config.schema.json
 
+release:
+  cargo-publish: false
+  debian: false
+  profile: release
+  bin: dummy
+  os:
+    - target: 'aarch64-unknown-linux-gnu'
+      os: 'ubicloud-standard-8-arm64'
+
 jobs:
   semver:
     if: false
