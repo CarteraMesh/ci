@@ -91,35 +91,37 @@ jobs:
         id: bin
         shell: bash
         run: |
-          bin_name=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | select(.name == "${{ inputs.package }}") | .targets[0].name' )
+          bin_name=$(cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | select(.name == "${{ inputs.package }}") | .targets[1].name' )
           if [ -n "$bin_name" ]; then
             echo "bin_name=$bin_name" >> $GITHUB_OUTPUT
-          #else
-          #  echo "bin_name=null" >> $GITHUB_OUTPUT
+            cargo install cargo-deb
           fi
 
-  upload-assets:
+  bin:
+    name: assets / ${{ matrix.target }}
     needs: [config, release]
-    name: assets / ${{ matrix.os }}
-    if: ${{ needs.release.outputs.bin_name }}
+    if: ${{ needs.release.outputs.bin }}
     strategy:
       matrix:
         include: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).release.os)) }}
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Init
+      - name: Init / ${{ matrix.target }}
         uses: carteramesh/ci/.github/actions/rust-init@main
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
           ref: ${{ needs.release.outputs.tag }}
+      - name: Build / ${{ matrix.target }}
+        run: cargo build --release
       - uses: taiki-e/upload-rust-binary-action@v1
+        name: Upload / ${{ matrix.target }}
         with:
           checksum: sha256
           profile: ${{ fromJSON(needs.config.outputs.config).release.profile || 'release' }}
           package: ${{ inputs.package }}
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
           # Note that glob pattern is not supported yet.
-          bin: ${{ needs.release.outputs.bin }}
+          bin: target/release/${{ needs.release.outputs.bin }}
           # (optional) Target triple, default is host triple.
           target: ${{ matrix.target }}
           # (optional) On which platform to distribute the `.tar.gz` file.
@@ -134,4 +136,3 @@ jobs:
           features: ${{ matrix.features || '' }}
           # (required) GitHub token for uploading assets to GitHub Releases.
           token: ${{ secrets.GITHUB_TOKEN }}
-#  cargo metadata --format-version 1 --no-deps | jq -r '.packages[] | select(.targets[] | .kind[] == "bin") | select(.name == "kiro-generator")'

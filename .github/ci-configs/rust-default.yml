@@ -23,6 +23,7 @@ pages:
 
 release:
   cargo-publish: true # release to cargo, otherwise just tag
+  debian: false
   profile: 'release'
   os:
     - target: aarch64-unknown-linux-gnu

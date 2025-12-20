@@ -31070,7 +31070,8 @@ function schema_global() {
 }
 function schema_release() {
     return objectType({
-        cargo_publish: booleanType().default(true),
+        ['cargo-publish']: booleanType().default(true),
+        debian: booleanType().default(false),
         profile: stringType().default('release'),
         os: arrayType(objectType({
             target: stringType(),
@@ -31081,6 +31082,10 @@ function schema_release() {
             {
                 target: 'x86_64-unknown-linux-gnu',
                 os: 'ubicloud-standard-4',
+            },
+            {
+                target: 'aarch64-unknown-linux-gnu',
+                os: 'ubicloud-standard-8-arm64',
             },
             {
                 target: 'aarch64-apple-darwin',

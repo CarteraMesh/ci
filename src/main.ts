@@ -46,7 +46,8 @@ function schema_global() {
 
 function schema_release() {
   return z.object({
-    cargo_publish: z.boolean().default(true),
+    ['cargo-publish']: z.boolean().default(true),
+    debian: z.boolean().default(false),
     profile: z.string().default('release'),
     os: z
       .array(
@@ -60,6 +61,10 @@ function schema_release() {
         {
           target: 'x86_64-unknown-linux-gnu',
           os: 'ubicloud-standard-4',
+        },
+        {
+          target: 'aarch64-unknown-linux-gnu',
+          os: 'ubicloud-standard-8-arm64',
         },
         {
           target: 'aarch64-apple-darwin',
