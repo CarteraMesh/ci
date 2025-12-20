@@ -35,7 +35,6 @@ jobs:
         uses: carteramesh/ci/.github/actions/rust-init@main
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
-          ref: ${{ needs.release.outputs.tag }}
       - name: Build / ${{ matrix.target }}
         run: cargo build --release
       - uses: taiki-e/upload-rust-binary-action@v1

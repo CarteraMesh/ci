@@ -33,7 +33,6 @@ jobs:
   release:
     needs: [config]
     outputs:
-      bin: ${{ steps.bin.outputs.bin_name }}
       tag: ${{ steps.release.outputs.tag }}
     runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
     permissions:
