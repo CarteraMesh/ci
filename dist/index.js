@@ -31033,6 +31033,7 @@ ZodNullable.create;
 function schema_pages(opt) {
     return objectType({
         mdbook: objectType({
+            if: booleanType().default(false),
             version: stringType().optional().default('latest'),
             path: stringType().default('docs'),
             command: stringType().optional().default('mdbook build'),

@@ -6,6 +6,7 @@ function schema_pages(opt?: boolean) {
   return z.object({
     mdbook: z
       .object({
+        if: z.boolean().default(false),
         version: z.string().optional().default('latest'),
         path: opt ? z.string().optional() : z.string().default('docs'),
         command: z.string().optional().default('mdbook build'),

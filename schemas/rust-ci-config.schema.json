@@ -13,6 +13,10 @@
             "mdbook": {
               "type": "object",
               "properties": {
+                "if": {
+                  "type": "boolean",
+                  "default": false
+                },
                 "version": {
                   "type": "string",
                   "default": "latest"
