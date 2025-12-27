@@ -64,7 +64,8 @@ jobs:
           ${{ fromJSON(needs.config.outputs.config).jobs.coverage.run }}
         env:
           FEATURES: ${{ matrix.features }}
-          CARGO_ARGS: ${{ fromJSON(needs.config.outputs.config).jobs.coverage.args || '' }}
+          LLVM_ARGS: ${{ fromJSON(needs.config.outputs.config).jobs.coverage.args.llvm || '' }}
+          CARGO_ARGS: ${{ fromJSON(needs.config.outputs.config).jobs.coverage.args.test || '' }}
           RUST_LOG: "${{ fromJSON(needs.config.outputs.config).global.rustlog || 'info' }}"
       - name: Record Rust version
         run: echo "RUST=$(rustc --version)" >> "$GITHUB_ENV"

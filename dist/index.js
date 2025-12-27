@@ -31030,13 +31030,12 @@ ZodPromise.create;
 ZodOptional.create;
 ZodNullable.create;
 
-function schema_pages() {
+function schema_pages(opt) {
     return objectType({
         mdbook: objectType({
-            if: booleanType().default(false),
-            version: stringType().default('latest'),
+            version: stringType().optional().default('latest'),
             path: stringType().default('docs'),
-            command: stringType().default('mdbook build'),
+            command: stringType().optional().default('mdbook build'),
         })
             .optional(),
     });
@@ -31095,30 +31094,45 @@ function schema_release() {
         ]),
     });
 }
-function schema_job_coverage() {
+function schema_job_coverage(opt) {
     return objectType({
-        if: booleanType(),
-        'continue-on-error': booleanType(),
-        args: stringType(),
-        run: stringType(),
-        matrix: objectType({
-            os: arrayType(stringType()).default([]),
-            toolchains: arrayType(stringType()).default(['stable']),
-            features: arrayType(stringType()).default(['default']),
-        }),
+        if: opt ? booleanType().optional() : booleanType().default(true),
+        'continue-on-error': booleanType().optional().default(false),
+        args: opt
+            ? objectType({
+                test: stringType().optional(),
+                llvm: stringType().optional(),
+            })
+            : objectType({
+                test: stringType().optional(),
+                llvm: stringType().optional(),
+            }),
+        run: opt ? stringType().optional() : stringType(),
+        matrix: opt
+            ? objectType({
+                os: arrayType(stringType()).default([]).optional(),
+                toolchains: arrayType(stringType()).default(['stable']).optional(),
+                features: arrayType(stringType()).default(['default']).optional(),
+            })
+                .optional()
+            : objectType({
+                os: arrayType(stringType()).default([]),
+                toolchains: arrayType(stringType()).default(['stable']),
+                features: arrayType(stringType()).default(['default']),
+            }),
     });
 }
-function schema_job_fmt() {
+function schema_job_fmt(opt) {
     return objectType({
-        if: booleanType(),
-        'continue-on-error': booleanType(),
-        run: stringType(),
+        if: opt ? booleanType().optional() : booleanType().default(true),
+        'continue-on-error': booleanType().optional().default(true),
+        run: opt ? stringType().optional() : stringType(),
     });
 }
-function schema_job_clippy() {
+function schema_job_clippy(opt) {
     return objectType({
-        if: booleanType(),
-        'continue-on-error': booleanType(),
+        if: opt ? booleanType().optional() : booleanType().default(true),
+        'continue-on-error': booleanType().optional().default(false),
         flags: stringType(),
         matrix: objectType({
             os: arrayType(stringType()).default([]),
@@ -31129,36 +31143,36 @@ function schema_job_clippy() {
 }
 function schema_job_semver() {
     return objectType({
-        if: booleanType(),
-        'continue-on-error': booleanType(),
+        if: booleanType().default(true),
+        'continue-on-error': booleanType().optional().default(false),
     });
 }
 function schema_job_hack() {
     return objectType({
         if: booleanType(),
-        'continue-on-error': booleanType(),
+        'continue-on-error': booleanType().optional().default(true),
         run: stringType(),
     });
 }
 function schema_job_doc() {
     return objectType({
         if: booleanType(),
-        'continue-on-error': booleanType(),
+        'continue-on-error': booleanType().optional().default(true),
         run: stringType(),
     });
 }
 function schema_job_dependencies() {
     return objectType({
         if: booleanType(),
-        'continue-on-error': booleanType(),
+        'continue-on-error': booleanType().optional().default(true),
         run: stringType(),
     });
 }
-function schema_job_cargo_sort() {
+function schema_job_cargo_sort(opt) {
     return objectType({
         if: booleanType(),
-        'continue-on-error': booleanType(),
-        run: stringType(),
+        'continue-on-error': booleanType().optional().default(true),
+        run: opt ? stringType().optional() : stringType(),
     });
 }
 function schema_job_extra() {
@@ -31174,26 +31188,33 @@ function schema_job_extra() {
         }),
     });
 }
-function schema_job_sanitizers() {
+function schema_job_sanitizers(opt) {
     return objectType({
         enabled: booleanType(),
         matrix: objectType({
             os: arrayType(stringType()).default([]),
             features: arrayType(stringType()),
         }),
-        address: objectType({
-            if: booleanType(),
-            'continue-on-error': booleanType(),
-            run: stringType(),
-        }),
+        address: opt
+            ? objectType({
+                if: booleanType(),
+                'continue-on-error': booleanType().optional().default(false),
+                run: stringType().optional(),
+            })
+                .optional()
+            : objectType({
+                if: booleanType(),
+                'continue-on-error': booleanType().optional().default(false),
+                run: stringType(),
+            }),
         leak: objectType({
             if: booleanType(),
-            'continue-on-error': booleanType(),
+            'continue-on-error': booleanType().optional().default(false),
             run: stringType(),
         }),
         thread: objectType({
             if: booleanType(),
-            'continue-on-error': booleanType(),
+            'continue-on-error': booleanType().optional().default(false),
             run: stringType(),
         }),
     });
@@ -31205,16 +31226,16 @@ objectType({
     global: schema_global().optional(),
     release: schema_release().optional(),
     jobs: objectType({
-        coverage: schema_job_coverage().optional(),
-        fmt: schema_job_fmt().optional(),
-        clippy: schema_job_clippy().optional(),
+        coverage: schema_job_coverage(true).optional(),
+        fmt: schema_job_fmt(true).optional(),
+        clippy: schema_job_clippy(true).optional(),
         semver: schema_job_semver().optional(),
         hack: schema_job_hack().optional(),
         doc: schema_job_doc().optional(),
         dependencies: schema_job_dependencies().optional(),
-        'cargo-sort': schema_job_cargo_sort().optional(),
+        'cargo-sort': schema_job_cargo_sort(true).optional(),
         extra: schema_job_extra().optional(),
-        sanitizers: schema_job_sanitizers().optional(),
+        sanitizers: schema_job_sanitizers(true).optional(),
     })
         .optional(),
 })

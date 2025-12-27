@@ -2,14 +2,13 @@ import * as core from '@actions/core';
 import fs from 'fs';
 import { z } from 'zod/v3';
 
-function schema_pages() {
+function schema_pages(opt?: boolean) {
   return z.object({
     mdbook: z
       .object({
-        if: z.boolean().default(false),
-        version: z.string().default('latest'),
-        path: z.string().default('docs'),
-        command: z.string().default('mdbook build'),
+        version: z.string().optional().default('latest'),
+        path: opt ? z.string().optional() : z.string().default('docs'),
+        command: z.string().optional().default('mdbook build'),
       })
       .optional(),
   });
@@ -75,32 +74,48 @@ function schema_release() {
   });
 }
 
-function schema_job_coverage() {
+function schema_job_coverage(opt?: boolean) {
   return z.object({
-    if: z.boolean(),
-    'continue-on-error': z.boolean(),
-    args: z.string(),
-    run: z.string(),
-    matrix: z.object({
-      os: z.array(z.string()).default([]),
-      toolchains: z.array(z.string()).default(['stable']),
-      features: z.array(z.string()).default(['default']),
-    }),
+    if: opt ? z.boolean().optional() : z.boolean().default(true),
+    'continue-on-error': z.boolean().optional().default(false),
+    args: opt
+      ? z.object({
+          test: z.string().optional(),
+          llvm: z.string().optional(),
+        })
+      : z.object({
+          test: z.string().optional(),
+          llvm: z.string().optional(),
+        }),
+    run: opt ? z.string().optional() : z.string(),
+    matrix: opt
+      ? z
+          .object({
+            os: z.array(z.string()).default([]).optional(),
+            toolchains: z.array(z.string()).default(['stable']).optional(),
+            features: z.array(z.string()).default(['default']).optional(),
+          })
+          .optional()
+      : z.object({
+          os: z.array(z.string()).default([]),
+          toolchains: z.array(z.string()).default(['stable']),
+          features: z.array(z.string()).default(['default']),
+        }),
   });
 }
 
-function schema_job_fmt() {
+function schema_job_fmt(opt?: boolean) {
   return z.object({
-    if: z.boolean(),
-    'continue-on-error': z.boolean(),
-    run: z.string(),
+    if: opt ? z.boolean().optional() : z.boolean().default(true),
+    'continue-on-error': z.boolean().optional().default(true),
+    run: opt ? z.string().optional() : z.string(),
   });
 }
 
-function schema_job_clippy() {
+function schema_job_clippy(opt?: boolean) {
   return z.object({
-    if: z.boolean(),
-    'continue-on-error': z.boolean(),
+    if: opt ? z.boolean().optional() : z.boolean().default(true),
+    'continue-on-error': z.boolean().optional().default(false),
     flags: z.string(),
     matrix: z.object({
       os: z.array(z.string()).default([]),
@@ -112,15 +127,15 @@ function schema_job_clippy() {
 
 function schema_job_semver() {
   return z.object({
-    if: z.boolean(),
-    'continue-on-error': z.boolean(),
+    if: z.boolean().default(true),
+    'continue-on-error': z.boolean().optional().default(false),
   });
 }
 
 function schema_job_hack() {
   return z.object({
     if: z.boolean(),
-    'continue-on-error': z.boolean(),
+    'continue-on-error': z.boolean().optional().default(true),
     run: z.string(),
   });
 }
@@ -128,7 +143,7 @@ function schema_job_hack() {
 function schema_job_doc() {
   return z.object({
     if: z.boolean(),
-    'continue-on-error': z.boolean(),
+    'continue-on-error': z.boolean().optional().default(true),
     run: z.string(),
   });
 }
@@ -136,16 +151,16 @@ function schema_job_doc() {
 function schema_job_dependencies() {
   return z.object({
     if: z.boolean(),
-    'continue-on-error': z.boolean(),
+    'continue-on-error': z.boolean().optional().default(true),
     run: z.string(),
   });
 }
 
-function schema_job_cargo_sort() {
+function schema_job_cargo_sort(opt?: boolean) {
   return z.object({
     if: z.boolean(),
-    'continue-on-error': z.boolean(),
-    run: z.string(),
+    'continue-on-error': z.boolean().optional().default(true),
+    run: opt ? z.string().optional() : z.string(),
   });
 }
 
@@ -163,26 +178,34 @@ function schema_job_extra() {
   });
 }
 
-function schema_job_sanitizers() {
+function schema_job_sanitizers(opt?: boolean) {
   return z.object({
     enabled: z.boolean(),
     matrix: z.object({
       os: z.array(z.string()).default([]),
       features: z.array(z.string()),
     }),
-    address: z.object({
-      if: z.boolean(),
-      'continue-on-error': z.boolean(),
-      run: z.string(),
-    }),
+    address: opt
+      ? z
+          .object({
+            if: z.boolean(),
+            'continue-on-error': z.boolean().optional().default(false),
+            run: z.string().optional(),
+          })
+          .optional()
+      : z.object({
+          if: z.boolean(),
+          'continue-on-error': z.boolean().optional().default(false),
+          run: z.string(),
+        }),
     leak: z.object({
       if: z.boolean(),
-      'continue-on-error': z.boolean(),
+      'continue-on-error': z.boolean().optional().default(false),
       run: z.string(),
     }),
     thread: z.object({
       if: z.boolean(),
-      'continue-on-error': z.boolean(),
+      'continue-on-error': z.boolean().optional().default(false),
       run: z.string(),
     }),
   });
@@ -197,16 +220,16 @@ export const ConfigSchemaLsp = z
     release: schema_release().optional(),
     jobs: z
       .object({
-        coverage: schema_job_coverage().optional(),
-        fmt: schema_job_fmt().optional(),
-        clippy: schema_job_clippy().optional(),
+        coverage: schema_job_coverage(true).optional(),
+        fmt: schema_job_fmt(true).optional(),
+        clippy: schema_job_clippy(true).optional(),
         semver: schema_job_semver().optional(),
         hack: schema_job_hack().optional(),
         doc: schema_job_doc().optional(),
         dependencies: schema_job_dependencies().optional(),
-        'cargo-sort': schema_job_cargo_sort().optional(),
+        'cargo-sort': schema_job_cargo_sort(true).optional(),
         extra: schema_job_extra().optional(),
-        sanitizers: schema_job_sanitizers().optional(),
+        sanitizers: schema_job_sanitizers(true).optional(),
       })
       .optional(),
   })
