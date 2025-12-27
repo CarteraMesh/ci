@@ -38,9 +38,11 @@ jobs:
   coverage:
     if: true
     continue-on-error: false
-    args: ''
+    args:
+      test: ''
+      llvm: ''
     run: |
-      cmd="cargo llvm-cov --locked --lcov --output-path lcov-${FEATURES}.info --no-fail-fast"
+      cmd="cargo llvm-cov ${LLVM_ARGS} --locked --lcov --output-path lcov-${FEATURES}.info --no-fail-fast"
       if [ "$FEATURES" == "default" ]; then
         $cmd -- --no-capture $CARGO_ARGS
       else
