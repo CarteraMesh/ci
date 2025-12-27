@@ -34,7 +34,7 @@ runs:
     - name: Merge YAML configs
       shell: bash
       run: |
-        # env | grep GITHUB | sort
+        shopt -s nullglob
         BRANCH_ACTION_CONFIG=""
         BRANCH_CONFIG=""
         if [ -d  "${{ github.action_path }}/../../ci-configs/rust" ]; then
@@ -46,8 +46,8 @@ runs:
         echo "BRANCH_ACTION_CONFIG=$BRANCH_ACTION_CONFIG"
         echo "BRANCH_CONFIG=$BRANCH_CONFIG"
         ls $BRANCH_ACTION_CONFIG || echo no branch action config files found
-        ls $BRANCH_CONFIG || echo no repo branch config files found
-        ls .github/ci-configs/rust*.yml || echo no repo config files find
+        [ -n "$BRANCH_CONFIG" ] && ls $BRANCH_CONFIG || echo no repo branch config files found
+        ls .github/ci-configs/*.yml || echo no repo config files find
         DUMMY=""
         if [ -f .github/ci-configs/dummy.yml ]; then
           DUMMY=".github/ci-configs/dummy.yml"
