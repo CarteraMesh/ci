@@ -5,9 +5,6 @@ ai:
   use_sticky_comment: false
   track_progress: true
   prompt: |
-    REPO: ${{ github.repository }}
-    PR NUMBER: ${{ github.event.pull_request.number }}
-
     Perform a comprehensive code review with the following focus areas:
     Provide detailed feedback using inline comments for ONLY issues, no praise inline comments.
     Use top-level comments for general observations or praise
@@ -41,7 +38,6 @@ ai:
 
     For each item, check if it is satisfied and comment on any that need attention.
     Post a summary comment with checklist results.
-
   # https://code.claude.com/docs/en/settings
   # https://www.schemastore.org/claude-code-settings.json
   settings:
@@ -59,12 +55,11 @@ ai:
         - Bash(npm run lint)
         - Bash(npm run test:*)
         - Bash(cargo .*)
-
       deny:
         - Bash(cargo publis.*)
-      #   - Read(./.env)
-      #   - Read(./.env.*)
-      #   - Read(./secrets/**)
+        #   - Read(./.env)
+        #   - Read(./.env.*)
+        #   - Read(./secrets/**)
     env:
       CLAUDE_CODE_ENABLE_TELEMETRY: '0'
       OTEL_METRICS_EXPORTER: otlp
