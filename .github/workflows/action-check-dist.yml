@@ -8,7 +8,6 @@
 # check and fail if the checked-in `dist/` directory does not match what is
 # expected from the build.
 name: Check Transpiled JavaScript
-
 on:
   pull_request:
     branches:
@@ -16,39 +15,35 @@ on:
   push:
     branches:
       - main
-
 permissions:
   contents: read
-
 jobs:
   check-dist:
     name: Check dist/
     runs-on: ${{ vars.RUNNER }}
-
     steps:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v6
-
       - name: Setup Node.js
         id: setup-node
         uses: ubicloud/setup-node@v4
         with:
           node-version-file: .node-version
           cache: npm
-
       - name: Remove dist/ Directory
         id: remove-dist
         run: npx rimraf ./dist
-
       - name: Install Dependencies
         id: install
         run: npm ci
-
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
+        with:
+          version: latest
       - name: Build dist/ Directory
         id: build
         run: npm run bundle && npm run schema
-
       # This will fail the workflow if the `dist/` directory is different than
       # expected.
       - name: Compare Directories
@@ -64,7 +59,6 @@ jobs:
             git diff --ignore-space-at-eol --text dist/
             exit 1
           fi
-
       - name: Check schema
         id: check-schema
         run: |
@@ -72,7 +66,6 @@ jobs:
             echo "Detected schema changes" >> /dev/stderr
             exit 1
           fi
-
       # If `dist/` was different than expected, upload the expected version as a
       # workflow artifact.
       - if: ${{ failure() && steps.diff.outcome == 'failure' }}
