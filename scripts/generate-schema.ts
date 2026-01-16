@@ -1,6 +1,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { ConfigSchemaLsp } from '../src/main';
-import fs from 'fs';
+import fs from 'node:fs';
 
 const jsonSchema = zodToJsonSchema(ConfigSchemaLsp, 'RustCIConfig');
 

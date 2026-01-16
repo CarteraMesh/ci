@@ -7,7 +7,7 @@
  */
 import { jest } from '@jest/globals';
 import * as core from '../__fixtures__/core.js';
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 import * as yaml from 'js-yaml';
 // Mocks should be declared before the module being tested is imported.
 jest.unstable_mockModule('@actions/core', () => core);

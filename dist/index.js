@@ -27,6 +27,7 @@ import require$$6 from 'string_decoder';
 import require$$0$9 from 'diagnostics_channel';
 import require$$2$2 from 'child_process';
 import require$$6$1 from 'timers';
+import fs from 'node:fs';
 
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -31522,7 +31523,7 @@ async function run() {
             configRaw = configFilePath;
         }
         else {
-            configRaw = require$$1.readFileSync(configFilePath, 'utf8');
+            configRaw = fs.readFileSync(configFilePath, 'utf8');
         }
         const finalConfig = ConfigSchema.parse(JSON.parse(configRaw));
         finalConfig.runner = coreExports.getInput('runner');

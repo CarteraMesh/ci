@@ -4,30 +4,30 @@
     "formatter": {
       "enabled": true,
       "indentStyle": "space",
-      "indentWidth": 2,
-    },
+      "indentWidth": 2
+    }
   },
   "vcs": {
     "enabled": false,
     "clientKind": "git",
-    "useIgnoreFile": false,
+    "useIgnoreFile": false
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!**/dist/**"],
+    "includes": ["**", "!**/dist/", "!coverage/"]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
     "formatWithErrors": true,
-    "indentWidth": 2,
+    "indentWidth": 2
   },
   "assist": {
     "actions": {
       "source": {
-        "organizeImports": "on",
-      },
-    },
+        "organizeImports": "on"
+      }
+    }
   },
   "linter": {
     "enabled": true,
@@ -42,10 +42,10 @@
         "useExhaustiveDependencies": {
           "level": "error",
           "options": {
-            "reportUnnecessaryDependencies": false,
-          },
+            "reportUnnecessaryDependencies": false
+          }
         },
-        "noUnusedVariables": "error",
+        "noUnusedVariables": "error"
       },
       "style": {
         "noParameterProperties": "error",
@@ -64,12 +64,12 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error",
-        "useArrayLiterals": "error",
+        "useArrayLiterals": "error"
       },
       "suspicious": {
-        "useAwait": "error",
+        "useAwait": "off",
         "noEvolvingTypes": "off",
-        "noExplicitAny": "off",
+        "noExplicitAny": "off"
       },
       "complexity": {
         "noUselessStringConcat": "error",
@@ -79,12 +79,12 @@
         "noBannedTypes": "off",
         "noForEach": "off",
         "useOptionalChain": "off",
-        "useLiteralKeys": "off",
+        "useLiteralKeys": "off"
       },
       "performance": {
-        "noAccumulatingSpread": "off",
-      },
-    },
+        "noAccumulatingSpread": "off"
+      }
+    }
   },
   "javascript": {
     "globals": ["Bun"],
@@ -102,7 +102,7 @@
       "indentStyle": "space",
       "jsxQuoteStyle": "double",
       "lineEnding": "lf",
-      "lineWidth": 120,
-    },
-  },
+      "lineWidth": 120
+    }
+  }
 }
