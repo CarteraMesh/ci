@@ -38,6 +38,10 @@ jobs:
         uses: carteramesh/ci/.github/actions/rust-init@main
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
+      - name: Validate ANTROPIC_API_KEY
+        shell: bash
+        run: |
+          [ -z "${{ secrets.ANTROPIC_API_KEY }}" ] && exit 1
       - name: jobtaker
         if: ${{ fromJSON(needs.config.outputs.config).ai.enabled }}
         uses: anthropics/claude-code-action@v1
