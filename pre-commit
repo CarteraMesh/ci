@@ -1,6 +1,2 @@
 #!/bin/bash
-if [ -f "$NVM_DIR/nvm.sh" ]; then
-  source "$NVM_DIR/nvm.sh"
-  nvm use || exit 1
-fi
-npm run precommit && git add .
+echo

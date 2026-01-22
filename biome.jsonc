@@ -87,7 +87,7 @@
     }
   },
   "javascript": {
-    "globals": ["Bun"],
+    "globals": ["Bun", "structuredClone"],
     "formatter": {
       "arrowParentheses": "always",
       "quoteStyle": "single",

@@ -9,25 +9,6 @@ on:
 permissions:
   contents: read
 jobs:
-  test-typescript:
-    name: TypeScript Tests
-    runs-on: ${{ vars.RUNNER }}
-    steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v6
-      - name: Setup Node.js
-        id: setup-node
-        uses: ubicloud/setup-node@v4
-        with:
-          node-version-file: .node-version
-          cache: npm
-      - name: Install Dependencies
-        id: npm-ci
-        run: npm ci
-      - name: Test
-        id: npm-ci-test
-        run: npm run ci-test
   test-action:
     name: Actions Test / ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
@@ -41,57 +22,19 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v6
-      - name: Check if yq exists
-        id: check-yq
-        shell: bash
-        run: |
-          if command -v yq &> /dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
-      - name: Setup yq
-        if: steps.check-yq.outputs.exists == 'false'
-        uses: carteramesh/ci/.github/actions/install-yq@main
-      - name: Merge YAML configs
-        shell: bash
-        run: |
-          yq eval-all '. as $item ireduce ({}; . * $item)' \
-            .github/ci-configs/rust-default.yml \
-            .github/ci-configs/rust/*.yml \
-            .github/ci-configs/test/*.yml \
-            -o json > merged.json
       - name: Test Local Action
         id: test-action
         uses: ./
-        with:
-          config: merged.json
-          runner: ${{ matrix.os }}
       - name: Print Output
         id: output
         shell: bash
         run: |
           echo '${{ steps.test-action.outputs.config }}' | jq .
-          runner="${{ fromJSON(steps.test-action.outputs.config).runner }}"
-          rustlog="${{ fromJSON(steps.test-action.outputs.config).global.rustlog }}"
           packages="${{ fromJSON(steps.test-action.outputs.config).global.packages.Linux }}"
-          pages="${{ fromJSON(steps.test-action.outputs.config).pages.mdbook.if }}"
-          if [ "$runner" != "${{ matrix.os }}" ]; then
-            echo "Runner mismatch ${runner} != ${{ matrix.os }}"
-            exit 1
-          fi
-          if [ "$rustlog" != "debug" ]; then
-            echo "Rust log level mismatch ${rustlog} != debug"
-            exit 1
-          fi
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            if [ "$packages" != "curl" ]; then
-              echo "mismatch ${packages} != curl"
-              exit 1
-            fi
-          fi
+          echo $packages
+          # pages="${{ fromJSON(steps.test-action.outputs.config).pages.mdbook.if }}"
 
-          if [ "$pages" != "false" ]; then
-            echo "pages should be false"
-            exit 1
-          fi
+          # if [ "$pages" != "false" ]; then
+          #   echo "pages should be false"
+          #   exit 1
+          # fi

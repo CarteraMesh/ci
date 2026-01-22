@@ -1,25 +1,23 @@
 name: ci-config
 description: config ci config
 author: Cartera Mesh
-
 branding:
   icon: scissors
   color: black
-
-# Define your inputs here.
-inputs:
-  config:
-    description: file path or JSON string
-    required: true
-  runner:
-    description: github runner name
-    required: false
-
-# Define your outputs here.
 outputs:
   config:
     description: JSON string of the config
-
+    value: ${{ steps.generate.outputs.config }}
 runs:
-  using: node24
-  main: dist/index.js
+  using: composite
+  steps:
+    - uses: oven-sh/setup-bun@v2
+      shell: bash
+    - id: generate
+      shell: bash
+      run: |
+        CONFIG=$(bun run ${{ github.action_path }}/scripts/generate-rust.ts)
+        CONFIG=$(echo "$CONFIG" | sed \
+          -e "s/var.RUNNER_ARM64/${{ vars.RUNNER_ARM64 }}/g" \
+          -e "s/var.RUNNER_AMD64/${{ vars.RUNNER_AMD64 }}/g")
+        echo "config=$CONFIG" >> $GITHUB_OUTPUT

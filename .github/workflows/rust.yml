@@ -4,10 +4,6 @@ on:
       runner:
         type: string
         required: false
-
-env:
-  MEMO: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} ${{ github.job }}'
-  JOB_URL: '${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}'
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -25,7 +21,6 @@ jobs:
         with:
           git_token: ${{ github.token }}
           runner: ${{ inputs.runner }}
-
   coverage:
     runs-on: ${{ matrix.os }}
     needs: [config]
@@ -111,7 +106,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tool_name: clippy-${{ matrix.toolchains }}-${{ matrix.features }}
           clippy_flags: ${{ matrix.features != 'default' && format('--features {0}', matrix.features) || '' }}
-
   semver:
     needs: [config]
     runs-on: ${{ vars.RUNNER_AMD64 }}
@@ -222,7 +216,6 @@ jobs:
           solana-rpc-url: ${{ secrets.RPC_URL }}
           commitment: 'finalized'
           set-env-vars: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.set-env-vars }}
-
       - name: Enable debug symbols
         run: |
           #rustup target add x86_64-unknown-linux-gnu
@@ -241,7 +234,6 @@ jobs:
           sed -i '/^\s*\[profile.dev\]/,/^\s*\[/ {/^\s*opt-level/d}' Cargo.toml
           # now set opt-level to 1
           sed -i '/^\s*\[profile.dev\]/a opt-level = 1' Cargo.toml
-
       - name: cargo test -Zsanitizer=address
         if: ${{ fromJSON(needs.config.outputs.config).jobs.sanitizers.address.if }}
         # only --lib --tests b/c of https://github.com/rust-lang/rust/issues/53945
@@ -262,7 +254,6 @@ jobs:
         run: cargo test --target ${_rust_target} -- --test-threads=1 --no-capture
         env:
           RUSTFLAGS: '-Z sanitizer=thread'
-
   extra:
     needs: [config]
     runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
