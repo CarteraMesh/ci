@@ -16,25 +16,23 @@ on:
         type: string
         required: false
         default: ''
-
 jobs:
   config:
     runs-on: ${{ inputs.runner || vars.RUNNER }}
     name: generate config
     outputs:
-      config: ${{ steps.merge.outputs.config }}
+      config: ${{ steps.config.outputs.config }}
     steps:
-      - name: merge
-        id: merge
+      - name: config
+        id: config
         uses: carteramesh/ci/.github/actions/rust-config@ts-baby
         with:
           git_token: ${{ github.token }}
-          runner: ${{ inputs.runner }}
   release:
     needs: [config]
     outputs:
       tag: ${{ steps.release.outputs.tag }}
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     permissions:
       contents: write
     steps:
@@ -55,7 +53,7 @@ jobs:
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NO_PUBLISH: ${{ fromJSON(needs.config.outputs.config).release.cargo-publish && '' || '--no-publish' }}
+          NO_PUBLISH: ${{ fromJSON(needs.config.outputs.config).release.cargoPublish && '' || '--no-publish' }}
         run: |
           cargo release \
             --package ${{ inputs.package }} \
@@ -85,7 +83,6 @@ jobs:
           generate_release_notes: true
           make_latest: ${{ steps.release.outputs.make_latest }}
           prerelease: ${{ steps.release.outputs.prerelease == 'true' }}
-
   bin:
     name: assets / ${{ matrix.target }}
     if: ${{ fromJSON(needs.config.outputs.config).release.bin }}
@@ -115,12 +112,10 @@ jobs:
         run: |
           tar czf ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz ${{ steps.build.outputs._bin }}
           sha256sum ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz > ${{ steps.build.outputs._bin }}-${{ matrix.target }}.tar.gz.sha256
-
       - name: Hash Deb / ${{ matrix.target }}
         if: ${{ steps.build.outputs._dpkg }}
         run: |
           sha256sum  ${{ steps.build.outputs._dpkg }} > ${{ steps.build.outputs._dpkg }}.sha256
-
       - name: Upload / ${{ matrix.target }}
         uses: softprops/action-gh-release@v2
         with:

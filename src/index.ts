@@ -1,6 +1,8 @@
 export enum Arch {
   ARM64 = 'vars.RUNNER_ARM64',
   AMD64 = 'vars.RUNNER_AMD64',
+  WIN = 'vars.RUNNER_WIN',
+  MAC = 'vars.RUNNER_MAC',
 }
 interface Global {
   // to match $RUNNER_OS
@@ -59,6 +61,13 @@ interface RustJobs {
   sanitizers: Sanitizers;
   semver: SemVer;
   extra: Extra;
+}
+
+interface Release {
+  publish: boolean;
+  debian: boolean;
+  profile: string;
+  os: Arch[];
 }
 
 export const JobDefaults: RustJobs = {
@@ -135,7 +144,7 @@ export const JobDefaults: RustJobs = {
     flags: '',
     matrix: {
       os: [Arch.ARM64],
-      toolchains: ['stable', 'nightly'],
+      toolchains: ['stable'],
       features: ['default'],
     },
   } as Clippy,
@@ -155,6 +164,7 @@ export const JobDefaults: RustJobs = {
 export class RustWorkflow {
   private jobs: RustJobs;
   private global: Global;
+  private release: Release;
 
   constructor() {
     this.jobs = {
@@ -171,6 +181,12 @@ export class RustWorkflow {
     };
 
     this.global = { packages: {} };
+    this.release = {
+      publish: true,
+      debian: false,
+      profile: 'release',
+      os: [Arch.AMD64],
+    };
   }
 
   linuxPackages(packages: string[]) {
@@ -204,7 +220,25 @@ export class RustWorkflow {
   }
 
   build() {
+    //   os:
+    //     - target: aarch64-unknown-linux-gnu
+    //       os: ubicloud-standard-8-arm
+    //     - target: x86_64-unknown-linux-gnu
+    //       os: ubicloud-standard-4
+    //     - target: aarch64-apple-darwin
+    //       os: macos-latest
+    // #    - target: x86_64-pc-windows-msvc
+    // #      os: windows-latest
     return {
+      release: {
+        publish: this.release.publish,
+        debian: this.release.debian,
+        profile: this.release.profile,
+        matrix: {
+          os: [Arch.AMD64],
+          target: ['x86_64-unknown-linux-gnu'],
+        },
+      },
       global: this.global,
       jobs: this.jobs,
     };
