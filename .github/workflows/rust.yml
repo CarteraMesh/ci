@@ -13,14 +13,13 @@ jobs:
     runs-on: ${{ inputs.runner || vars.RUNNER }}
     name: generate config
     outputs:
-      config: ${{ steps.merge.outputs.config }}
+      config: ${{ steps.config.outputs.config }}
     steps:
-      - name: merge
-        id: merge
-        uses: carteramesh/ci/.github/actions/rust-config@main
+      - name: config
+        id: config
+        uses: carteramesh/ci/.github/actions/rust-config@ts-baby
         with:
           git_token: ${{ github.token }}
-          runner: ${{ inputs.runner }}
   coverage:
     runs-on: ${{ matrix.os }}
     needs: [config]
@@ -31,12 +30,13 @@ jobs:
       matrix: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).jobs.coverage.matrix)) }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: fireblocks
-        uses: carteramesh/fireblocks-config-action@main
-        if: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.enabled }}
+        uses: carteramesh/fireblocks-config-action@ts-baby
+        if: false
+        # if: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.enabled }}
         with:
           fireblocks-secret: |
             ${{ secrets.FIREBLOCKS_SECRET }}
@@ -44,7 +44,7 @@ jobs:
           fireblocks-endpoint: ${{ vars.FIREBLOCKS_ENDPOINT }}
           solana-rpc-url: ${{ secrets.RPC_URL }}
           commitment: 'finalized'
-          set-env-vars: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.set-env-vars }}
+          # set-env-vars: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.set-env-vars }}
       - name: llvm-tools
         shell: bash
         run: |
@@ -74,12 +74,12 @@ jobs:
           env_vars: OS,RUST
   fmt:
     needs: [config]
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: fmt
     if: ${{ fromJSON(needs.config.outputs.config).jobs.fmt.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
       - name: fmt
         run: |
           ${{ fromJSON(needs.config.outputs.config).jobs.fmt.run }}
@@ -96,7 +96,7 @@ jobs:
       matrix: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).jobs.clippy.matrix)) }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: ${{ matrix.toolchains }} cargo clippy (${{ matrix.features }})
@@ -109,12 +109,11 @@ jobs:
   semver:
     needs: [config]
     runs-on: ${{ vars.RUNNER_AMD64 }}
-    #    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
     name: semver
     if: ${{ fromJSON(needs.config.outputs.config).jobs.semver.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: cargo-semver-checks
@@ -125,12 +124,12 @@ jobs:
     needs: [config]
     # cargo-hack checks combinations of feature flags to ensure that features are all additive
     # which is required for feature unification
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: hack
     if: ${{ fromJSON(needs.config.outputs.config).jobs.hack.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: Install cargo-hack
@@ -144,12 +143,12 @@ jobs:
         run: cargo hack --feature-powerset check
   doc:
     needs: [config]
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: doc
-    if: ${{ fromJSON(needs.config.outputs.config).jobs.doc.if }}
+    if: ${{ fromJSON(needs.config.outputs.config).jobs.docCheck.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: Install cargo-docs-rs
@@ -159,15 +158,15 @@ jobs:
           locked: false
       - name: cargo docs-rs
         run: |
-          ${{ fromJSON(needs.config.outputs.config).jobs.cargo-docs.run }}
+          ${{ fromJSON(needs.config.outputs.config).jobs.dockCheck.run }}
   cargo-sort:
     needs: [config]
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: cargo-sort
-    if: ${{ fromJSON(needs.config.outputs.config).jobs.cargo-sort.if }}
+    if: ${{ fromJSON(needs.config.outputs.config).jobs.cargoSort.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
       - name: Install cargo-sort
         uses: baptiste0928/cargo-install@v3
         with:
@@ -175,15 +174,15 @@ jobs:
           locked: false
       - name: Check `Cargo.toml` sort
         run: |
-          ${{ fromJSON(needs.config.outputs.config).jobs.cargo-sort.run }}
+          ${{ fromJSON(needs.config.outputs.config).jobs.cargoSort.run }}
   dependencies:
     needs: [config]
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: check unused deps
     if: ${{ fromJSON(needs.config.outputs.config).jobs.dependencies.if }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
       - name: Install cargo-machete
         uses: baptiste0928/cargo-install@v3
         with:
@@ -202,12 +201,13 @@ jobs:
     needs: [config, coverage]
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: fireblocks
-        uses: carteramesh/fireblocks-config-action@main
-        if: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.enabled }}
+        uses: carteramesh/fireblocks-config-action@ts-baby
+        if: false
+        # if: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.enabled }}
         with:
           fireblocks-secret: |
             ${{ secrets.FIREBLOCKS_SECRET }}
@@ -215,7 +215,6 @@ jobs:
           fireblocks-endpoint: ${{ vars.FIREBLOCKS_ENDPOINT }}
           solana-rpc-url: ${{ secrets.RPC_URL }}
           commitment: 'finalized'
-          set-env-vars: ${{ fromJSON(needs.config.outputs.config).global.fireblocks.set-env-vars }}
       - name: Enable debug symbols
         run: |
           #rustup target add x86_64-unknown-linux-gnu
@@ -256,15 +255,15 @@ jobs:
           RUSTFLAGS: '-Z sanitizer=thread'
   extra:
     needs: [config]
-    runs-on: ${{ fromJSON(needs.config.outputs.config).runner }}
+    runs-on: ${{ vars.RUNNER }}
     name: ${{ fromJSON(needs.config.outputs.config).jobs.extra.name }}
     if: ${{ fromJSON(needs.config.outputs.config).jobs.extra.if }}
     strategy:
       fail-fast: false
-      matrix: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).jobs.sanitizers.matrix)) }}
+      matrix: ${{ fromJSON(toJSON(fromJSON(needs.config.outputs.config).jobs.extra.matrix)) }}
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: ${{ fromJSON(needs.config.outputs.config).jobs.extra.name }}

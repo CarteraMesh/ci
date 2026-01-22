@@ -26,7 +26,7 @@ jobs:
     steps:
       - name: merge
         id: merge
-        uses: carteramesh/ci/.github/actions/rust-config@main
+        uses: carteramesh/ci/.github/actions/rust-config@ts-baby
         with:
           git_token: ${{ github.token }}
           runner: ${{ inputs.runner }}
@@ -39,7 +39,7 @@ jobs:
       contents: write
     steps:
       - name: Init
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
       - name: Install cargo-release
@@ -96,7 +96,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: Init / ${{ matrix.target }}
-        uses: carteramesh/ci/.github/actions/rust-init@main
+        uses: carteramesh/ci/.github/actions/rust-init@ts-baby
         with:
           packages: ${{ toJSON(fromJSON(needs.config.outputs.config).global.packages) }}
           ref: ${{ needs.release.outputs.tag }}

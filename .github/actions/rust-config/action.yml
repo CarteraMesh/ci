@@ -7,11 +7,10 @@ inputs:
   runner:
     description: 'Runner to use for CI'
     required: false
-
 outputs:
   config:
     description: 'Configuration JSON output'
-    value: ${{ steps.merge.outputs.config }}
+    value: ${{ steps.config.outputs.config }}
 runs:
   using: composite
   steps:
@@ -19,50 +18,6 @@ runs:
       uses: actions/checkout@v6
       with:
         token: ${{ inputs.git_token || github.token }}
-    - name: Check if yq exists
-      id: check-yq
-      shell: bash
-      run: |
-        if command -v yq &> /dev/null; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-        fi
-    - name: Setup yq
-      if: steps.check-yq.outputs.exists == 'false'
-      uses: carteramesh/ci/.github/actions/install-yq@main
-    - name: Merge YAML configs
-      shell: bash
-      run: |
-        shopt -s nullglob
-        BRANCH_ACTION_CONFIG=""
-        BRANCH_CONFIG=""
-        if [ -d  "${{ github.action_path }}/../../ci-configs/rust" ]; then
-          BRANCH_ACTION_CONFIG="${{ github.action_path }}/../../ci-configs/rust/*.yml"
-        fi
-        if [ -d "../../ci-configs/$GITHUB_REF_NAME" ]; then
-          BRANCH_CONFIG="../../ci-configs/$GITHUB_REF_NAME/rust*.yml"
-        fi
-        echo "BRANCH_ACTION_CONFIG=$BRANCH_ACTION_CONFIG"
-        echo "BRANCH_CONFIG=$BRANCH_CONFIG"
-        ls $BRANCH_ACTION_CONFIG || echo no branch action config files found
-        [ -n "$BRANCH_CONFIG" ] && ls $BRANCH_CONFIG || echo no repo branch config files found
-        ls .github/ci-configs/*.yml || echo no repo config files find
-        DUMMY=""
-        if [ -f .github/ci-configs/dummy.yml ]; then
-          DUMMY=".github/ci-configs/dummy.yml"
-          echo found dummy config for testing
-        fi
-        yq eval-all '. as $item ireduce ({}; . * $item)' \
-          "${{ github.action_path }}/../../ci-configs/rust-default.yml" \
-          $BRANCH_ACTION_CONFIG \
-          $BRANCH_CONFIG \
-          .github/ci-configs/rust*.yml \
-          $DUMMY \
-          -o json > merged.json
-    - name: merge
-      id: merge
-      uses: carteramesh/ci@main
-      with:
-        config: merged.json
-        runner: ${{ inputs.runner }}
+    - name: config
+      id: config
+      uses: carteramesh/ci@ts-baby

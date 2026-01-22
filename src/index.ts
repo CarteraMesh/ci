@@ -29,6 +29,10 @@ interface Hack extends BaseJob {}
 interface CargoSort extends BaseJob {}
 interface DocCheck extends BaseJob {}
 interface Dependencies extends BaseJob {}
+interface Extra extends BaseJob {
+  name: string;
+  matrix: Matrix;
+}
 interface Sanitizers {
   enabled: boolean;
   address: BaseJob;
@@ -54,9 +58,10 @@ interface RustJobs {
   hack: Hack;
   sanitizers: Sanitizers;
   semver: SemVer;
+  extra: Extra;
 }
 
-export const JobDefaults = {
+export const JobDefaults: RustJobs = {
   fmt: {
     if: true,
     continueOnError: false,
@@ -134,6 +139,17 @@ export const JobDefaults = {
       features: ['default'],
     },
   } as Clippy,
+  extra: {
+    if: false,
+    continueOnError: false,
+    run: '',
+    name: 'extra',
+    matrix: {
+      os: [Arch.ARM64],
+      toolchains: ['stable'],
+      features: ['default'],
+    },
+  },
 };
 
 export class RustWorkflow {
@@ -151,6 +167,7 @@ export class RustWorkflow {
       sanitizers: structuredClone(JobDefaults.sanitizers),
       clippy: structuredClone(JobDefaults.clippy),
       coverage: structuredClone(JobDefaults.coverage),
+      extra: structuredClone(JobDefaults.extra),
     };
 
     this.global = { packages: {} };
@@ -163,6 +180,13 @@ export class RustWorkflow {
 
   semver(enable: boolean) {
     this.jobs.semver.if = enable;
+    return this;
+  }
+
+  extra(name: string, run: string) {
+    this.jobs.extra.if = true;
+    this.jobs.extra.name = name;
+    this.jobs.extra.run = run;
     return this;
   }
 
@@ -180,7 +204,10 @@ export class RustWorkflow {
   }
 
   build() {
-    return this.jobs;
+    return {
+      global: this.global,
+      jobs: this.jobs,
+    };
   }
 }
 
