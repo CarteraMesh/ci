@@ -21,8 +21,8 @@ jobs:
         with:
           arm64: ${{ vars.RUNNER_ARM64 }}
           amd64: ${{ vars.RUNNER_AMD64 }}
-          # RUNNER_WIN: "windows-latest"
-          # RUNNER_MAC: "macos-latest"
+          # win: "windows-latest"
+          # mac: "macos-latest"
           git_token: ${{ github.token }}
   coverage:
     runs-on: ${{ matrix.os }}

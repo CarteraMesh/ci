@@ -5,9 +5,11 @@ inputs:
     description: 'Token to authenticate for git'
     required: false
   arm64:
-    required: true
+    default: "ubicloud-standard-8-arm"
+    required: false
   amd64:
-    required: true
+    default: "ubicloud-standard-4"
+    required: false
 outputs:
   config:
     description: 'Configuration JSON output'
@@ -26,7 +28,7 @@ runs:
       id: config
       shell: bash
       run: |
-        CONFIG=$(echo "${{ steps.generate.outputs.config }}" | sed \
-            -e "s/vars.RUNNER_ARM64/${{ inputs.arm64 }}/g" \
-            -e "s/vars.RUNNER_AMD64/${{ inputs.amd64 }}/g")
+        CONFIG="$(echo '${{ steps.generate.outputs.config }}' | sed \
+            -e 's/vars.RUNNER_ARM64/${{ inputs.arm64 }}/g' \
+            -e 's/vars.RUNNER_AMD64/${{ inputs.amd64 }}/g')"
         echo "config=$CONFIG" >> $GITHUB_OUTPUT
