@@ -12,8 +12,8 @@ interface Global {
 }
 
 interface BaseJob {
-  if: boolean;
-  continueOnError: boolean;
+  if: boolean | string;
+  continueOnError: boolean | string;
   run?: string;
 }
 
