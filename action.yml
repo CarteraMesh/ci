@@ -11,13 +11,15 @@ outputs:
 runs:
   using: composite
   steps:
-    - uses: oven-sh/setup-bun@v2
-      shell: bash
+    - name: setup bun
+      uses: oven-sh/setup-bun@v2
     - id: generate
+      name: generate
       shell: bash
       run: |
+        if [ ! -f .github/rust-ci.ts ]; then
+          echo "::error::Missing .github/rust-ci.ts config file"
+          exit 1
+        fi
         CONFIG=$(bun run ${{ github.action_path }}/scripts/generate-rust.ts)
-        CONFIG=$(echo "$CONFIG" | sed \
-          -e "s/var.RUNNER_ARM64/${{ vars.RUNNER_ARM64 }}/g" \
-          -e "s/var.RUNNER_AMD64/${{ vars.RUNNER_AMD64 }}/g")
         echo "config=$CONFIG" >> $GITHUB_OUTPUT
