@@ -19,6 +19,10 @@ jobs:
         id: config
         uses: carteramesh/ci/.github/actions/rust-config@ts-baby
         with:
+          arm64: ${{ vars.RUNNER_ARM64 }}
+          amd64: ${{ vars.RUNNER_AMD64 }}
+          # RUNNER_WIN: "windows-latest"
+          # RUNNER_MAC: "macos-latest"
           git_token: ${{ github.token }}
   coverage:
     runs-on: ${{ matrix.os }}

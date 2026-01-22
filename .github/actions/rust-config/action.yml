@@ -4,6 +4,10 @@ inputs:
   git_token:
     description: 'Token to authenticate for git'
     required: false
+  arm64:
+    required: true
+  amd64:
+    required: true
 outputs:
   config:
     description: 'Configuration JSON output'
@@ -23,6 +27,6 @@ runs:
       shell: bash
       run: |
         CONFIG=$(echo "${{ steps.generate.outputs.config }}" | sed \
-            -e "s/vars.RUNNER_ARM64/${{ vars.RUNNER_ARM64 }}/g" \
-            -e "s/vars.RUNNER_AMD64/${{ vars.RUNNER_AMD64 }}/g")
+            -e "s/vars.RUNNER_ARM64/${{ inputs.arm64 }}/g" \
+            -e "s/vars.RUNNER_AMD64/${{ inputs.amd64 }}/g")
         echo "config=$CONFIG" >> $GITHUB_OUTPUT
