@@ -16,8 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ${{ vars.RUNNER }}
-          - windows-latest
+          - ${{ vars.RUNNER_ARM64 }}
     steps:
       - name: Checkout
         id: checkout

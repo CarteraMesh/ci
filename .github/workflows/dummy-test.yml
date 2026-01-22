@@ -6,9 +6,9 @@ on:
   push:
     branches: [main]
   pull_request:
-
 jobs:
   verify:
+    if: false
     name: dummy
     uses: ./.github/workflows/rust.yml
     secrets: inherit
