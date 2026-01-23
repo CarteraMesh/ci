@@ -254,8 +254,8 @@ jobs:
           RUSTFLAGS: '-Z sanitizer=thread'
   extra:
     needs: [config]
-    runs-on: ${{ vars.RUNNER }}
-    name: ${{ fromJSON(needs.config.outputs.config).jobs.extra.name }}
+    runs-on: ${{ matrix.os }}
+    name: ${{ fromJSON(needs.config.outputs.config).jobs.extra.name }} / ${{ matrix.os }}
     if: ${{ fromJSON(needs.config.outputs.config).jobs.extra.if }}
     strategy:
       fail-fast: false

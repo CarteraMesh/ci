@@ -230,6 +230,7 @@ export class RustWorkflow {
     // #    - target: x86_64-pc-windows-msvc
     // #      os: windows-latest
     return {
+      extra: this.extra,
       release: {
         publish: this.release.publish,
         debian: this.release.debian,
